@@ -27,44 +27,128 @@ namespace RedCorners.Components
         const int DefaultLatitudePrecision = 4;
         const int DefaultLongitudePrecision = 4;
 
-        public double Latitude { get; private set; }
-        public double Longitude { get; private set; }
+        bool isConvertDirty = true;
+        bool isConvertBackDirty = true;
+        double _latitude, _longitude;
+        string[] _words = null;
+        Dictionary<string, int> dic = null;
+
         public string[] Index { get; private set; }
-        public string[] Words { get; private set; }
         public int LatitudePrecision { get; private set; }
         public int LongitudePrecision { get; private set; }
-        public override string ToString() => string.Join(" ", Words);
+
+        public double Latitude
+        {
+            get
+            {
+                ConvertBack();
+                return _latitude;
+            }
+            set
+            {
+                if (_latitude != value)
+                {
+                    _latitude = value;
+                    isConvertDirty = true;
+                }
+            }
+        }
+
+        public double Longitude
+        {
+            get
+            {
+                ConvertBack();
+                return _longitude;
+            }
+            set
+            {
+                if (_longitude != value)
+                {
+                    _longitude = value;
+                    isConvertDirty = true;
+                }
+            }
+        }
+
+        public string[] Words
+        {
+            get
+            {
+                Convert();
+                return _words;
+            }
+            set
+            {
+                if (_words != value)
+                {
+                    _words = value;
+                    isConvertBackDirty = true;
+                }
+            }
+        }
+
+        public CoordsWords(string[] index = null, int latitudePrecision = DefaultLatitudePrecision, int longitudePrecision = DefaultLongitudePrecision)
+        {
+            Index = index;
+            LatitudePrecision = latitudePrecision;
+            LongitudePrecision = longitudePrecision;
+        }
 
         public CoordsWords(double latitude, double longitude, string[] index = null, int latitudePrecision = DefaultLatitudePrecision, int longitudePrecision = DefaultLongitudePrecision)
         {
-            index = index ?? LoadDefaultIndex();
-            Latitude = latitude;
-            Longitude = longitude;
+            Index = index;
+            _latitude = latitude;
+            _longitude = longitude;
             LatitudePrecision = latitudePrecision;
             LongitudePrecision = longitudePrecision;
-            Index = index;
-            Words = Convert(latitude, longitude, index, latitudePrecision, longitudePrecision);
+            isConvertBackDirty = false;
         }
 
         public CoordsWords(string words, string[] index = null, int latitudePrecision = DefaultLatitudePrecision, int longitudePrecision = DefaultLongitudePrecision)
         {
-            index = index ?? LoadDefaultIndex();
-            Words = words.Split(' ');
-            LatitudePrecision = latitudePrecision;
-            LongitudePrecision = longitudePrecision;
-            (Latitude, Longitude) = ConvertBack(Words, index, latitudePrecision, longitudePrecision);
-            Index = index;
+            LoadWords(words.Split(' '), index, latitudePrecision, longitudePrecision);
+        }
+
+        public CoordsWords(string words, string delimiter, string[] index = null, int latitudePrecision = DefaultLatitudePrecision, int longitudePrecision = DefaultLongitudePrecision)
+        {
+            LoadWords(words.Split(new[] { delimiter }, StringSplitOptions.None), index, latitudePrecision, longitudePrecision);
         }
 
         public CoordsWords(string[] words, string[] index = null, int latitudePrecision = DefaultLatitudePrecision, int longitudePrecision = DefaultLongitudePrecision)
         {
-            index = index ?? LoadDefaultIndex();
-            Words = words;
+            LoadWords(words, index, latitudePrecision, longitudePrecision);
+        }
+
+        void LoadWords(string[] words, string[] index, int latitudePrecision, int longitudePrecision)
+        {
+            Index = index;
+            _words = words;
             LatitudePrecision = latitudePrecision;
             LongitudePrecision = longitudePrecision;
-            (Latitude, Longitude) = ConvertBack(Words, index, latitudePrecision, longitudePrecision);
-            Index = index;
+            isConvertDirty = false;
         }
+
+        void Convert()
+        {
+            if (isConvertDirty)
+            {
+                _words = Convert(Latitude, Longitude, Index, LatitudePrecision, LongitudePrecision);
+            }
+            isConvertDirty = false;
+        }
+
+        void ConvertBack()
+        {
+            if (isConvertBackDirty)
+            {
+                (_latitude, _longitude) = ConvertBack(Words, Index, LatitudePrecision, LongitudePrecision);
+            }
+            isConvertBackDirty = false;
+        }
+
+        public override string ToString() => string.Join(" ", Words);
+        public string ToString(string delimiter) => string.Join(delimiter, Words);
 
         string[] LoadDefaultIndex()
         {
@@ -91,8 +175,9 @@ namespace RedCorners.Components
             if (radix < 2) throw new DivideByZeroException("Index must have at least two elements. Cannot convert CoordsWords!");
         }
 
-        static string[] Convert(double latitude, double longitude, string[] index, int latitudePrecision, int longitudePrecision)
+        string[] Convert(double latitude, double longitude, string[] index, int latitudePrecision, int longitudePrecision)
         {
+            index = index ?? LoadDefaultIndex();
             CheckIndex(index);
             long lat = (long)((latitude - MinimumLatitude + 100) * Math.Pow(10, latitudePrecision));
             long lng = (long)((longitude - MinimumLongitude + 100) * Math.Pow(10, longitudePrecision));
@@ -100,8 +185,9 @@ namespace RedCorners.Components
             return DecimalToArbitrarySystem(num, index).ToArray();
         }
 
-        static (double latitude, double longitude) ConvertBack(string[] words, string[] index, int latitudePrecision, int longitudePrecision)
+        (double latitude, double longitude) ConvertBack(string[] words, string[] index, int latitudePrecision, int longitudePrecision)
         {
+            index = index ?? LoadDefaultIndex();
             CheckIndex(index);
             long num = ArbitrarySystemToDecimal(words, index);
             long lat = num / (long)Math.Pow(10, latitudePrecision + 3);
@@ -137,16 +223,19 @@ namespace RedCorners.Components
             return result;
         }
 
-        static long ArbitrarySystemToDecimal(string[] input, string[] system)
+        long ArbitrarySystemToDecimal(string[] input, string[] system)
         {
             int radix = system.Length;
 
             if (radix < 2 || radix > system.Length)
                 throw new ArgumentException("The radix must be >= 2 and <= " + system.Length.ToString());
 
-            var dic = new Dictionary<string, int>();
-            for (int i = 0; i < system.Length; i++)
-                dic[system[i]] = i;
+            if (dic == null)
+            {
+                dic = new Dictionary<string, int>();
+                for (int i = 0; i < system.Length; i++)
+                    dic[system[i]] = i;
+            }
 
             long result = 0;
             for (int i = 0; i < input.Length; i++)

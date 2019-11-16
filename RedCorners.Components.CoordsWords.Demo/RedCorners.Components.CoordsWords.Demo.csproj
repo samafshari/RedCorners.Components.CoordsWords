@@ -7,16 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="words.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="words.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\RedCorners.Components.CoordsWords\RedCorners.Components.CoordsWords.csproj" />
   </ItemGroup>
 
