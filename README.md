@@ -1,9 +1,16 @@
 Convert map coordinates to a sequence of words and back.
 
 NuGet: [https://www.nuget.org/packages/RedCorners.Components.CoordsWords](https://www.nuget.org/packages/RedCorners.Components.CoordsWords)
+
 GitHub: [https://github.com/samafshari/RedCorners.Components.CoordsWords](https://github.com/samafshari/RedCorners.Components.CoordsWords)
 
 ## Getting Started
+
+Install the NuGet and use the `RedCorners.Components` namespace:
+
+```c#
+using RedCorners.Components;
+```
 
 You can convert a pair of latitude and longitudes to a sequence of words (space-delimited) like this:
 
@@ -25,6 +32,10 @@ By default, the library comes with a list of English words. You can use an arbit
 var lines = File.ReadAllLines("words.txt");
 string sequence = new CoordsWords(latitude, longitude, lines).ToString();
 ```
+
+The more words in your index file, the less words the output sequence will have. The default index results in sequences with four words.
+
+**It is strongly recommended to use a custom index file, as the default index may change between releases, resulting in changes in the outputted sequence for a given input.** 
 
 ## Example
 
