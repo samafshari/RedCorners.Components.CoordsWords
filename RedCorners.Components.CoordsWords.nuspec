@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>RedCorners.Components.CoordsWords</id>
+    <version>5.1.0</version>
+    <title>RedCorners.Components.CoordsWords</title>
+    <authors>NeatCapital OÜ</authors>
+    <owners>NeatCapital OÜ</owners>
+    <projectUrl>https://github.com/samafshari/RedCorners.Components.CoordsWords</projectUrl>
+    <icon>redcorners_components_coordswords.png</icon>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Convert map coordinates to a sequence of words and back.</description>
+    <releaseNotes>Convert map coordinates to a sequence of words and back.</releaseNotes>
+    <copyright>Copyright 2019 NeatCapital OÜ</copyright>
+    <tags>Coordinates, Latitude, Longitude</tags>
+
+    <dependencies>
+      <group targetFramework="netstandard2.0">
+      </group>
+    </dependencies>
+
+    <license type="file">license.txt</license>
+  </metadata>
+
+  <files>
+    <file src="license.txt" target="" />
+    <file src="redcorners_components_coordswords.png" target="" />
+    <file 
+      src="RedCorners.Components.CoordsWords\bin\Release\netstandard2.0\RedCorners.Components.CoordsWords.dll" 
+      target="lib\netstandard2.0\RedCorners.Components.CoordsWords.dll" />
+  </files>
+</package>
