@@ -33,6 +33,7 @@ namespace RedCorners.Components
         string[] _words = null;
         Dictionary<string, int> dic = null;
 
+        string[] originalIndex;
         public string[] Index { get; private set; }
         public int LatitudePrecision { get; private set; }
         public int LongitudePrecision { get; private set; }
@@ -91,6 +92,7 @@ namespace RedCorners.Components
         public CoordsWords(string[] index = null, int latitudePrecision = DefaultLatitudePrecision, int longitudePrecision = DefaultLongitudePrecision)
         {
             Index = index;
+            originalIndex = index;
             LatitudePrecision = latitudePrecision;
             LongitudePrecision = longitudePrecision;
         }
@@ -98,6 +100,7 @@ namespace RedCorners.Components
         public CoordsWords(double latitude, double longitude, string[] index = null, int latitudePrecision = DefaultLatitudePrecision, int longitudePrecision = DefaultLongitudePrecision)
         {
             Index = index;
+            originalIndex = index;
             _latitude = latitude;
             _longitude = longitude;
             LatitudePrecision = latitudePrecision;
@@ -123,6 +126,7 @@ namespace RedCorners.Components
         void LoadWords(string[] words, string[] index, int latitudePrecision, int longitudePrecision)
         {
             Index = index;
+            originalIndex = index;
             _words = words;
             LatitudePrecision = latitudePrecision;
             LongitudePrecision = longitudePrecision;
@@ -245,6 +249,21 @@ namespace RedCorners.Components
             }
 
             return result;
+        }
+
+        void Shuffle(int seed)
+        {
+            dic = null;
+            var random = new Random(seed);
+            if (originalIndex == null) originalIndex = LoadDefaultIndex();
+            Index = new string[originalIndex.Length];
+            var shuffledIndices = Enumerable.Range(0, originalIndex.Length).OrderBy(x => random.NextDouble()).ToArray();
+            for (int i = 0; i < originalIndex.Length; i++)
+            {
+                Index[i] = originalIndex[shuffledIndices[i]];
+            }
+            isConvertBackDirty = true;
+            isConvertDirty = true;
         }
     }
 }

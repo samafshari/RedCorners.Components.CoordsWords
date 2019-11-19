@@ -65,6 +65,26 @@ namespace RedCorners.Demo
                 }
             }
 
+
+            Console.WriteLine("Seed 1");
+            {
+                foreach (var p in testPoints)
+                {
+                    var coordsWords = new CoordsWords();
+                    coordsWords.Shuffle(1);
+                    Console.WriteLine($"Input:\t{p.Item1}, {p.Item2}");
+                    coordsWords.Latitude = p.Item1;
+                    coordsWords.Longitude = p.Item2;
+                    Console.WriteLine($"Words:\t{coordsWords}");
+
+                    var reverse = new CoordsWords();
+                    reverse.Shuffle(1);
+                    reverse.Words = coordsWords.Words;
+                    Console.WriteLine($"Back:\t{reverse.Latitude:N4}, {reverse.Longitude:N4}");
+                    Console.WriteLine("---");
+                }
+            }
+
             // https://github.com/oprogramador/most-common-words-by-language
 
         }
