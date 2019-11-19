@@ -7,6 +7,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="french.txt" />
+    <None Remove="german.txt" />
+    <None Remove="english.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="french.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="german.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="english.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\RedCorners.Components.CoordsWords\RedCorners.Components.CoordsWords.csproj" />
   </ItemGroup>
 
