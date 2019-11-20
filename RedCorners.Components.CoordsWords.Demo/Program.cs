@@ -71,7 +71,7 @@ namespace RedCorners.Demo
                 foreach (var p in testPoints)
                 {
                     var coordsWords = new CoordsWords();
-                    coordsWords.Shuffle(1);
+                    coordsWords.Shuffle(2);
                     Console.WriteLine($"Input:\t{p.Item1}, {p.Item2}");
                     coordsWords.Latitude = p.Item1;
                     coordsWords.Longitude = p.Item2;

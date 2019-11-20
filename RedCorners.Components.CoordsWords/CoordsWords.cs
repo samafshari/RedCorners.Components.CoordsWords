@@ -19,10 +19,14 @@ namespace RedCorners.Components
          * The International Date Line (IDL) roughly follows the 180° longitude. 
          * A longitude with a positive value falls in the eastern hemisphere and negative value falls in the western hemisphere.
          */
-        const double MinimumLatitude = -90.0;
-        const double MaximumLatitude = 90.0;
-        const double MinimumLongitude = -180.0;
-        const double MaximumLongitude = 180.0;
+        public const double MinimumLatitude = -90.0;
+        public const double MaximumLatitude = 90.0;
+        public const double MinimumLongitude = -180.0;
+        public const double MaximumLongitude = 180.0;
+
+        public static bool ValidateCoords(double latitude, double longitude) =>
+            MinimumLatitude <= latitude && latitude <= MaximumLatitude &&
+            MinimumLongitude <= longitude && longitude <= MaximumLongitude;
 
         const int DefaultLatitudePrecision = 4;
         const int DefaultLongitudePrecision = 4;
@@ -42,15 +46,17 @@ namespace RedCorners.Components
         {
             get
             {
+                if (IsAllDirty) return default;
                 ConvertBack();
                 return _latitude;
             }
             set
             {
-                if (_latitude != value)
+                if (_latitude != value || IsAllDirty)
                 {
                     _latitude = value;
                     isConvertDirty = true;
+                    isConvertBackDirty = false;
                 }
             }
         }
@@ -59,15 +65,17 @@ namespace RedCorners.Components
         {
             get
             {
+                if (IsAllDirty) return default;
                 ConvertBack();
                 return _longitude;
             }
             set
             {
-                if (_longitude != value)
+                if (_longitude != value || IsAllDirty)
                 {
                     _longitude = value;
                     isConvertDirty = true;
+                    isConvertBackDirty = false;
                 }
             }
         }
@@ -76,18 +84,22 @@ namespace RedCorners.Components
         {
             get
             {
+                if (IsAllDirty) return default;
                 Convert();
                 return _words;
             }
             set
             {
-                if (_words != value)
+                if (_words != value || IsAllDirty)
                 {
                     _words = value;
+                    isConvertDirty = false;
                     isConvertBackDirty = true;
                 }
             }
         }
+
+        bool IsAllDirty => isConvertDirty && isConvertBackDirty;
 
         public CoordsWords(string[] index = null, int latitudePrecision = DefaultLatitudePrecision, int longitudePrecision = DefaultLongitudePrecision)
         {
@@ -151,8 +163,8 @@ namespace RedCorners.Components
             isConvertBackDirty = false;
         }
 
-        public override string ToString() => string.Join(" ", Words);
-        public string ToString(string delimiter) => string.Join(delimiter, Words);
+        public override string ToString() => Words == null ? null : string.Join(" ", Words);
+        public string ToString(string delimiter) => Words == null ? null : string.Join(delimiter, Words);
 
         string[] LoadDefaultIndex()
         {
@@ -251,7 +263,7 @@ namespace RedCorners.Components
             return result;
         }
 
-        void Shuffle(int seed)
+        public void Shuffle(int seed)
         {
             dic = null;
             var random = new Random(seed);
@@ -262,8 +274,8 @@ namespace RedCorners.Components
             {
                 Index[i] = originalIndex[shuffledIndices[i]];
             }
-            isConvertBackDirty = true;
-            isConvertDirty = true;
+            isConvertBackDirty = false;
+            isConvertDirty = false;
         }
     }
 }
