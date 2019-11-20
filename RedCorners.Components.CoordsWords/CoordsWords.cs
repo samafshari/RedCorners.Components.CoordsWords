@@ -37,6 +37,7 @@ namespace RedCorners.Components
         public string[] Index { get; private set; }
         public int LatitudePrecision { get; private set; }
         public int LongitudePrecision { get; private set; }
+        public string Separator { get; set; } = " ";
 
         public double Latitude
         {
@@ -110,12 +111,13 @@ namespace RedCorners.Components
 
         public CoordsWords(string words, string[] index = null, int latitudePrecision = DefaultLatitudePrecision, int longitudePrecision = DefaultLongitudePrecision)
         {
-            LoadWords(words.Split(' '), index, latitudePrecision, longitudePrecision);
+            LoadWords(words.Split(new[] { Separator }, StringSplitOptions.None), index, latitudePrecision, longitudePrecision);
         }
 
-        public CoordsWords(string words, string delimiter, string[] index = null, int latitudePrecision = DefaultLatitudePrecision, int longitudePrecision = DefaultLongitudePrecision)
+        public CoordsWords(string words, string separator, string[] index = null, int latitudePrecision = DefaultLatitudePrecision, int longitudePrecision = DefaultLongitudePrecision)
         {
-            LoadWords(words.Split(new[] { delimiter }, StringSplitOptions.None), index, latitudePrecision, longitudePrecision);
+            Separator = separator;
+            LoadWords(words.Split(new[] { separator }, StringSplitOptions.None), index, latitudePrecision, longitudePrecision);
         }
 
         public CoordsWords(string[] words, string[] index = null, int latitudePrecision = DefaultLatitudePrecision, int longitudePrecision = DefaultLongitudePrecision)
@@ -151,8 +153,8 @@ namespace RedCorners.Components
             isConvertBackDirty = false;
         }
 
-        public override string ToString() => string.Join(" ", Words);
-        public string ToString(string delimiter) => string.Join(delimiter, Words);
+        public override string ToString() => string.Join(Separator, Words);
+        public string ToString(string separator) => string.Join(separator, Words);
 
         string[] LoadDefaultIndex()
         {
