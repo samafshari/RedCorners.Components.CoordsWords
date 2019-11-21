@@ -128,8 +128,10 @@ namespace RedCorners.Components
 
         public CoordsWords(string words, string separator, string[] index = null, int latitudePrecision = DefaultLatitudePrecision, int longitudePrecision = DefaultLongitudePrecision)
         {
+            separator = separator ?? "";
             Separator = separator;
-            LoadWords(words.Split(new[] { separator }, StringSplitOptions.None), index, latitudePrecision, longitudePrecision);
+            string[] wordsArray = separator == "" ? words.Select(x => x.ToString()).ToArray() : words.Split(new[] { separator }, StringSplitOptions.None);
+            LoadWords(wordsArray, index, latitudePrecision, longitudePrecision);
         }
 
         public CoordsWords(string[] words, string[] index = null, int latitudePrecision = DefaultLatitudePrecision, int longitudePrecision = DefaultLongitudePrecision)
