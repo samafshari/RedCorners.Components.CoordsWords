@@ -18,6 +18,12 @@ namespace RedCorners.Components
             Four = 4
         }
 
+        public enum Scale
+        {
+            Full = 1,
+            Half = 2
+        }
+
         /*
          * The valid range of latitude in degrees is -90 and +90 for the southern and northern hemisphere respectively. 
          * Longitude is in the range -180 and +180 specifying coordinates west and east of the Prime Meridian, respectively.
@@ -37,8 +43,10 @@ namespace RedCorners.Components
             MinimumLatitude <= latitude && latitude <= MaximumLatitude &&
             MinimumLongitude <= longitude && longitude <= MaximumLongitude;
 
-        const Precision DefaultLatitudePrecision = Precision.Three;
+        const Precision DefaultLatitudePrecision = Precision.Four;
         const Precision DefaultLongitudePrecision = Precision.Four;
+        const Scale DefaultLatitudeScale = Scale.Full;
+        const Scale DefaultLongitudeScale = Scale.Full;
 
         bool isConvertDirty = true;
         bool isConvertBackDirty = true;
@@ -47,9 +55,13 @@ namespace RedCorners.Components
         Dictionary<string, int> dic = null;
 
         string[] originalIndex;
+
         public string[] Index { get; private set; }
         public Precision LatitudePrecision { get; private set; }
         public Precision LongitudePrecision { get; private set; }
+        //public Scale LatitudeScale { get; private set; }
+        //public Scale LongitudeScale { get; private set; }
+
         public string Separator { get; set; } = " ";
 
         public double Latitude
@@ -111,52 +123,54 @@ namespace RedCorners.Components
 
         bool IsAllDirty => isConvertDirty && isConvertBackDirty;
 
-        public CoordsWords(string[] index = null, Precision latitudePrecision = DefaultLatitudePrecision, Precision longitudePrecision = DefaultLongitudePrecision)
+        public CoordsWords(string[] index = null, Precision latitudePrecision = DefaultLatitudePrecision, Precision longitudePrecision = DefaultLongitudePrecision)//, Scale latitudeScale = DefaultLatitudeScale, Scale longitudeScale = DefaultLongitudeScale)
         {
             Index = index;
             originalIndex = index;
             LatitudePrecision = latitudePrecision;
             LongitudePrecision = longitudePrecision;
+            //LatitudeScale = latitudeScale;
+            //LongitudeScale = longitudeScale;
         }
 
-        public CoordsWords(double latitude, double longitude, string[] index = null, Precision latitudePrecision = DefaultLatitudePrecision, Precision longitudePrecision = DefaultLongitudePrecision)
-        {
-            Index = index;
-            originalIndex = index;
-            _latitude = latitude;
-            _longitude = longitude;
-            LatitudePrecision = latitudePrecision;
-            LongitudePrecision = longitudePrecision;
-            isConvertBackDirty = false;
-        }
+        //public CoordsWords(double latitude, double longitude, string[] index = null, Precision latitudePrecision = DefaultLatitudePrecision, Precision longitudePrecision = DefaultLongitudePrecision)
+        //{
+        //    Index = index;
+        //    originalIndex = index;
+        //    _latitude = latitude;
+        //    _longitude = longitude;
+        //    LatitudePrecision = latitudePrecision;
+        //    LongitudePrecision = longitudePrecision;
+        //    isConvertBackDirty = false;
+        //}
 
-        public CoordsWords(string words, string[] index = null, Precision latitudePrecision = DefaultLatitudePrecision, Precision longitudePrecision = DefaultLongitudePrecision)
-        {
-            LoadWords(words.Split(new[] { Separator }, StringSplitOptions.None), index, latitudePrecision, longitudePrecision);
-        }
+        //public CoordsWords(string words, string[] index = null, Precision latitudePrecision = DefaultLatitudePrecision, Precision longitudePrecision = DefaultLongitudePrecision)
+        //{
+        //    LoadWords(words.Split(new[] { Separator }, StringSplitOptions.None), index, latitudePrecision, longitudePrecision);
+        //}
 
-        public CoordsWords(string words, string separator, string[] index = null, Precision latitudePrecision = DefaultLatitudePrecision, Precision longitudePrecision = DefaultLongitudePrecision)
-        {
-            separator = separator ?? "";
-            Separator = separator;
-            string[] wordsArray = separator == "" ? words.Select(x => x.ToString()).ToArray() : words.Split(new[] { separator }, StringSplitOptions.None);
-            LoadWords(wordsArray, index, latitudePrecision, longitudePrecision);
-        }
+        //public CoordsWords(string words, string separator, string[] index = null, Precision latitudePrecision = DefaultLatitudePrecision, Precision longitudePrecision = DefaultLongitudePrecision)
+        //{
+        //    separator = separator ?? "";
+        //    Separator = separator;
+        //    string[] wordsArray = separator == "" ? words.Select(x => x.ToString()).ToArray() : words.Split(new[] { separator }, StringSplitOptions.None);
+        //    LoadWords(wordsArray, index, latitudePrecision, longitudePrecision);
+        //}
 
-        public CoordsWords(string[] words, string[] index = null, Precision latitudePrecision = DefaultLatitudePrecision, Precision longitudePrecision = DefaultLongitudePrecision)
-        {
-            LoadWords(words, index, latitudePrecision, longitudePrecision);
-        }
+        //public CoordsWords(string[] words, string[] index = null, Precision latitudePrecision = DefaultLatitudePrecision, Precision longitudePrecision = DefaultLongitudePrecision)
+        //{
+        //    LoadWords(words, index, latitudePrecision, longitudePrecision);
+        //}
 
-        void LoadWords(string[] words, string[] index, Precision latitudePrecision, Precision longitudePrecision)
-        {
-            Index = index;
-            originalIndex = index;
-            _words = words;
-            LatitudePrecision = latitudePrecision;
-            LongitudePrecision = longitudePrecision;
-            isConvertDirty = false;
-        }
+        //void LoadWords(string[] words, string[] index, Precision latitudePrecision, Precision longitudePrecision)
+        //{
+        //    Index = index;
+        //    originalIndex = index;
+        //    _words = words;
+        //    LatitudePrecision = latitudePrecision;
+        //    LongitudePrecision = longitudePrecision;
+        //    isConvertDirty = false;
+        //}
 
         void Convert()
         {
@@ -204,22 +218,22 @@ namespace RedCorners.Components
             if (radix < 2) throw new DivideByZeroException("Index must have at least two elements. Cannot convert CoordsWords!");
         }
 
-        string[] Convert(double latitude, double longitude, string[] index, int latitudePrecision, int longitudePrecision)
+        string[] Convert(double latitude, double longitude, string[] index, int latitudePrecision, int longitudePrecision)//, int latitudeScale, int longitudeScale)
         {
             index = index ?? LoadDefaultIndex();
             CheckIndex(index);
             long lat = (long)((latitude - MinimumLatitude + 100) * Math.Pow(10, latitudePrecision));
             long lng = (long)((longitude - MinimumLongitude + 100) * Math.Pow(10, longitudePrecision));
-            long num = lat * (long)Math.Pow(10, latitudePrecision + 3) + lng;
+            long num = lat * (long)Math.Pow(10, longitudePrecision + 3) + lng;
             return DecimalToArbitrarySystem(num, index).ToArray();
         }
 
-        (double latitude, double longitude) ConvertBack(string[] words, string[] index, int latitudePrecision, int longitudePrecision)
+        (double latitude, double longitude) ConvertBack(string[] words, string[] index, int latitudePrecision, int longitudePrecision)//, int latitudeScale, int longitudeScale)
         {
             index = index ?? LoadDefaultIndex();
             CheckIndex(index);
             long num = ArbitrarySystemToDecimal(words, index);
-            long lat = num / (long)Math.Pow(10, latitudePrecision + 3);
+            long lat = num / (long)Math.Pow(10, longitudePrecision + 3);
             long lng = num % (long)Math.Pow(10, longitudePrecision + 3);
             double latitude = ((double)lat / Math.Pow(10, latitudePrecision)) + MinimumLatitude - 100;
             double longitude = ((double)lng / Math.Pow(10, longitudePrecision)) + MinimumLongitude - 100;

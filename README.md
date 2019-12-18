@@ -10,18 +10,21 @@ Install the NuGet and use the `RedCorners.Components` namespace:
 
 ```c#
 using RedCorners.Components;
+var coordsWords = new CoordsWords();
 ```
 
-You can convert a pair of latitude and longitudes to a sequence of words (space-delimited) like this:
+You can convert a pair of latitude and longitudes to a sequence of words like this:
 
 ```c#
-string sequence = new CoordsWords(latitude, longitude).ToString();
+coordsWords.Latitude = latitude;
+coordsWords.Longitude = longitude;
+string[] sequence = coordsWords.Words;
 ```
 
 You can convert back the sequence of words to the coordinates like this:
 
 ```c#
-var coordsWords = new CoordsWords(sequence);
+coordsWords.Words = sequence;
 var latitude = coordsWords.Latitude;
 var longitude = coordsWords.Longitude;
 ```
@@ -30,7 +33,7 @@ By default, the library comes with a list of English words. You can use an arbit
 
 ```c#
 var lines = File.ReadAllLines("words.txt");
-string sequence = new CoordsWords(latitude, longitude, lines).ToString();
+var coordsWords = new CoordsWords(lines);
 ```
 
 The more words in your index file, the less words the output sequence will have. The default index results in sequences with four words.
@@ -90,15 +93,20 @@ static void Main(string[] args)
         (59.32323232,18.0757757757)
     };
 
-    foreach (var p in testPoints)
-    {
-        Console.WriteLine($"Input:\t{p.Item1}, {p.Item2}");
-        var coordsWords = new CoordsWords(p.Item1, p.Item2).ToString();
-        Console.WriteLine($"Words:\t{coordsWords}");
+	foreach (var p in testPoints)
+	{
+		Console.WriteLine($"Input:\t{p.Item1}, {p.Item2}");
+		var coordsWords = new CoordsWords();
+		coordsWords.Latitude = p.Item1;
+		coordsWords.Longitude = p.Item2;
+		var words = coordsWords.Words;
+		Console.WriteLine($"Words:\t{coordsWords}");
 
-        var reverse = new CoordsWords(coordsWords.ToString());
-        Console.WriteLine($"Back:\t{reverse.Latitude:N4}, {reverse.Longitude:N4}");
-        Console.WriteLine("---");
-    }
+		
+		var reverse = new CoordsWords();
+		reverse.Words = words;
+		Console.WriteLine($"Back:\t{reverse.Latitude:N4}, {reverse.Longitude:N4}");
+		Console.WriteLine("---");
+	}
 }
 ```

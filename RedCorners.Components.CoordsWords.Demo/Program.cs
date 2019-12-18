@@ -37,7 +37,7 @@ namespace RedCorners.Demo
 
             var english = File.ReadAllLines("english.txt").Select(x => x.ToLower()).ToArray();
 
-            string[][] indices = new[]
+            string[][] indices = new string[][]
             {
                 null,
                 alphabet,
@@ -46,20 +46,23 @@ namespace RedCorners.Demo
                 characters,
                 french,
                 german,
-                english
             };
 
             foreach (var index in indices)
             {
                 Console.WriteLine("**********");
-
                 foreach (var p in testPoints)
                 {
                     Console.WriteLine($"Input:\t{p.Item1}, {p.Item2}");
-                    var coordsWords = new CoordsWords(p.Item1, p.Item2, index).ToString();
+                    var coordsWords = new CoordsWords(index);
+                    coordsWords.Latitude = p.Item1;
+                    coordsWords.Longitude = p.Item2;
+                    var words = coordsWords.Words;
                     Console.WriteLine($"Words:\t{coordsWords}");
 
-                    var reverse = new CoordsWords(coordsWords.ToString(), index);
+                    
+                    var reverse = new CoordsWords(index);
+                    reverse.Words = words;
                     Console.WriteLine($"Back:\t{reverse.Latitude:N4}, {reverse.Longitude:N4}");
                     Console.WriteLine("---");
                 }
@@ -78,7 +81,7 @@ namespace RedCorners.Demo
                     Console.WriteLine($"Words:\t{coordsWords}");
 
                     var reverse = new CoordsWords();
-                    reverse.Shuffle(1);
+                    reverse.Shuffle(2);
                     reverse.Words = coordsWords.Words;
                     Console.WriteLine($"Back:\t{reverse.Latitude:N4}, {reverse.Longitude:N4}");
                     Console.WriteLine("---");
