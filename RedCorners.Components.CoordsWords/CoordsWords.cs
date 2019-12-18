@@ -9,6 +9,15 @@ namespace RedCorners.Components
 {
     public class CoordsWords
     {
+        public enum Precision
+        {
+            Zero = 0,
+            One = 1,
+            Two = 2,
+            Three = 3,
+            Four = 4
+        }
+
         /*
          * The valid range of latitude in degrees is -90 and +90 for the southern and northern hemisphere respectively. 
          * Longitude is in the range -180 and +180 specifying coordinates west and east of the Prime Meridian, respectively.
@@ -28,8 +37,8 @@ namespace RedCorners.Components
             MinimumLatitude <= latitude && latitude <= MaximumLatitude &&
             MinimumLongitude <= longitude && longitude <= MaximumLongitude;
 
-        const int DefaultLatitudePrecision = 4;
-        const int DefaultLongitudePrecision = 4;
+        const Precision DefaultLatitudePrecision = Precision.Three;
+        const Precision DefaultLongitudePrecision = Precision.Four;
 
         bool isConvertDirty = true;
         bool isConvertBackDirty = true;
@@ -39,8 +48,8 @@ namespace RedCorners.Components
 
         string[] originalIndex;
         public string[] Index { get; private set; }
-        public int LatitudePrecision { get; private set; }
-        public int LongitudePrecision { get; private set; }
+        public Precision LatitudePrecision { get; private set; }
+        public Precision LongitudePrecision { get; private set; }
         public string Separator { get; set; } = " ";
 
         public double Latitude
@@ -102,7 +111,7 @@ namespace RedCorners.Components
 
         bool IsAllDirty => isConvertDirty && isConvertBackDirty;
 
-        public CoordsWords(string[] index = null, int latitudePrecision = DefaultLatitudePrecision, int longitudePrecision = DefaultLongitudePrecision)
+        public CoordsWords(string[] index = null, Precision latitudePrecision = DefaultLatitudePrecision, Precision longitudePrecision = DefaultLongitudePrecision)
         {
             Index = index;
             originalIndex = index;
@@ -110,7 +119,7 @@ namespace RedCorners.Components
             LongitudePrecision = longitudePrecision;
         }
 
-        public CoordsWords(double latitude, double longitude, string[] index = null, int latitudePrecision = DefaultLatitudePrecision, int longitudePrecision = DefaultLongitudePrecision)
+        public CoordsWords(double latitude, double longitude, string[] index = null, Precision latitudePrecision = DefaultLatitudePrecision, Precision longitudePrecision = DefaultLongitudePrecision)
         {
             Index = index;
             originalIndex = index;
@@ -121,12 +130,12 @@ namespace RedCorners.Components
             isConvertBackDirty = false;
         }
 
-        public CoordsWords(string words, string[] index = null, int latitudePrecision = DefaultLatitudePrecision, int longitudePrecision = DefaultLongitudePrecision)
+        public CoordsWords(string words, string[] index = null, Precision latitudePrecision = DefaultLatitudePrecision, Precision longitudePrecision = DefaultLongitudePrecision)
         {
             LoadWords(words.Split(new[] { Separator }, StringSplitOptions.None), index, latitudePrecision, longitudePrecision);
         }
 
-        public CoordsWords(string words, string separator, string[] index = null, int latitudePrecision = DefaultLatitudePrecision, int longitudePrecision = DefaultLongitudePrecision)
+        public CoordsWords(string words, string separator, string[] index = null, Precision latitudePrecision = DefaultLatitudePrecision, Precision longitudePrecision = DefaultLongitudePrecision)
         {
             separator = separator ?? "";
             Separator = separator;
@@ -134,12 +143,12 @@ namespace RedCorners.Components
             LoadWords(wordsArray, index, latitudePrecision, longitudePrecision);
         }
 
-        public CoordsWords(string[] words, string[] index = null, int latitudePrecision = DefaultLatitudePrecision, int longitudePrecision = DefaultLongitudePrecision)
+        public CoordsWords(string[] words, string[] index = null, Precision latitudePrecision = DefaultLatitudePrecision, Precision longitudePrecision = DefaultLongitudePrecision)
         {
             LoadWords(words, index, latitudePrecision, longitudePrecision);
         }
 
-        void LoadWords(string[] words, string[] index, int latitudePrecision, int longitudePrecision)
+        void LoadWords(string[] words, string[] index, Precision latitudePrecision, Precision longitudePrecision)
         {
             Index = index;
             originalIndex = index;
@@ -153,7 +162,7 @@ namespace RedCorners.Components
         {
             if (isConvertDirty)
             {
-                _words = Convert(Latitude, Longitude, Index, LatitudePrecision, LongitudePrecision);
+                _words = Convert(Latitude, Longitude, Index, (int)LatitudePrecision, (int)LongitudePrecision);
             }
             isConvertDirty = false;
         }
@@ -162,7 +171,7 @@ namespace RedCorners.Components
         {
             if (isConvertBackDirty)
             {
-                (_latitude, _longitude) = ConvertBack(Words, Index, LatitudePrecision, LongitudePrecision);
+                (_latitude, _longitude) = ConvertBack(Words, Index, (int)LatitudePrecision, (int)LongitudePrecision);
             }
             isConvertBackDirty = false;
         }
@@ -211,7 +220,7 @@ namespace RedCorners.Components
             CheckIndex(index);
             long num = ArbitrarySystemToDecimal(words, index);
             long lat = num / (long)Math.Pow(10, latitudePrecision + 3);
-            long lng = num % (long)Math.Pow(10, latitudePrecision + 3);
+            long lng = num % (long)Math.Pow(10, longitudePrecision + 3);
             double latitude = ((double)lat / Math.Pow(10, latitudePrecision)) + MinimumLatitude - 100;
             double longitude = ((double)lng / Math.Pow(10, longitudePrecision)) + MinimumLongitude - 100;
             return (latitude, longitude);
@@ -269,14 +278,21 @@ namespace RedCorners.Components
 
         public void Shuffle(int seed)
         {
-            dic = null;
-            var random = new Random(seed);
             if (originalIndex == null) originalIndex = LoadDefaultIndex();
-            Index = new string[originalIndex.Length];
-            var shuffledIndices = Enumerable.Range(0, originalIndex.Length).OrderBy(x => random.NextDouble()).ToArray();
-            for (int i = 0; i < originalIndex.Length; i++)
+            dic = null;
+            if (seed == 0)
             {
-                Index[i] = originalIndex[shuffledIndices[i]];
+                Index = originalIndex.ToArray();
+            }
+            else
+            {
+                var random = new Random(seed);
+                Index = new string[originalIndex.Length];
+                var shuffledIndices = Enumerable.Range(0, originalIndex.Length).OrderBy(x => random.NextDouble()).ToArray();
+                for (int i = 0; i < originalIndex.Length; i++)
+                {
+                    Index[i] = originalIndex[shuffledIndices[i]];
+                }
             }
             isConvertBackDirty = false;
             isConvertDirty = false;
